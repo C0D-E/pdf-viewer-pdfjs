@@ -4,16 +4,21 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 function renderPDF(pdf) {
   const viewer = document.getElementById('pdf-viewer');
   viewer.innerHTML = '';
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+  // Render pages sequentially to avoid race conditions
+  function renderPage(pageNum) {
+    if (pageNum > pdf.numPages) return;
     pdf.getPage(pageNum).then(function(page) {
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       viewer.appendChild(canvas);
-      page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport });
+      page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function() {
+        renderPage(pageNum + 1);
+      });
     });
   }
+  renderPage(1);
 }
 
 function loadPDFfromArrayBuffer(arrayBuffer) {
