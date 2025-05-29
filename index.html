@@ -1,127 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Viewer</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf_viewer.css">
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start; /* Align content to the top */
-            font-family: 'Inter', Arial, sans-serif;
-            background-color: #f4f7f9; /* Light background color */
-            color: #333;
-        }
-
-        #app-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        #buttonContainer {
-            padding: 20px;
-            text-align: center;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-        }
-
-        #loadPdfButton {
-            padding: 12px 28px;
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-            background-color: #007bff; /* Primary blue */
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        #loadPdfButton:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-
-        #loadPdfButton:active {
-            transform: translateY(1px); /* Slight press effect */
-        }
-
-        #pdfViewerContainer {
-            width: 90%; /* Responsive width */
-            max-width: 850px; /* Max width for readability */
-            height: 75vh; /* Significant portion of viewport height */
-            border: 1px solid #dee2e6; /* Subtle border */
-            overflow: auto; /* Essential for PDF.js viewer scrolling */
-            margin-top: 0; /* No extra margin if button container handles it */
-            background-color: #ffffff; /* White background for PDF content */
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        /* This class is used by pdf_viewer.css for proper styling */
-        .pdfViewer {
-            /* PDF.js applies its own styles here */
-        }
-
-        #messageArea {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            min-height: 20px; /* Reserve space */
-            text-align: center;
-            width: 90%;
-            max-width: 850px;
-        }
-        .message-success {
-            background-color: #d4edda; /* Green for success */
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .message-error {
-            background-color: #f8d7da; /* Red for errors */
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .message-loading {
-            background-color: #e2e3e5; /* Gray for loading */
-            color: #383d41;
-            border: 1px solid #d6d8db;
-        }
-
-        /* Hide the default file input */
-        input[type="file"] {
-            display: none;
-        }
-    </style>
+    <title>Test PDF.js Load</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
 </head>
 <body>
-    <div id="app-container">
-        <div id="buttonContainer">
-            <button id="loadPdfButton" aria-label="Load and Display PDF">Load and Display PDF</button>
-            <input type="file" id="pdfFile" accept="application/pdf">
-        </div>
-        
-        <div id="messageArea"></div>
-
-        <div id="pdfViewerContainer" class="pdfViewer">
-            </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf_viewer.js"></script>
-    
-    <script src="./index.js"></script>
+    <p>Check the browser console for messages.</p>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            console.log('SUCCESS: pdfjsLib loaded successfully!', pdfjsLib);
+            alert('SUCCESS: pdfjsLib loaded!');
+        } else {
+            console.error('FAILURE: pdfjsLib did NOT load.');
+            alert('FAILURE: pdfjsLib did NOT load.');
+        }
+    </script>
 </body>
 </html>
