@@ -1,19 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Test PDF.js Load (v3.11.174)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+    <style>
+        body, html { height: 100%; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; font-family: 'Inter', Arial, sans-serif; background-color: #f4f7f9; color: #333; }
+        #app-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
+        #buttonContainer { padding: 20px; text-align: center; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 25px; }
+        #loadPdfButton { padding: 12px 28px; font-size: 16px; font-weight: 500; color: white; background-color: #007bff; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        #loadPdfButton:hover { background-color: #0056b3; }
+        #loadPdfButton:active { transform: translateY(1px); }
+        #pdfViewerContainer { width: 90%; max-width: 850px; height: 75vh; border: 1px solid #dee2e6; overflow: auto; margin-top: 0; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+        .pdfViewer { /* PDF.js applies its own styles here */ }
+        #messageArea { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; min-height: 20px; text-align: center; width: 90%; max-width: 850px; }
+        .message-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message-loading { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+        input[type="file"] { display: none; }
+    </style>
 </head>
 <body>
-    <p>Check the browser console for messages.</p>
-    <script>
-        if (typeof pdfjsLib !== 'undefined') {
-            console.log('SUCCESS: pdfjsLib (v3.11.174) loaded successfully!', pdfjsLib);
-            alert('SUCCESS: pdfjsLib (v3.11.174) loaded!');
-        } else {
-            console.error('FAILURE: pdfjsLib (v3.11.174) did NOT load.');
-            alert('FAILURE: pdfjsLib (v3.11.174) did NOT load.');
-        }
-    </script>
+    <div id="app-container">
+        <div id="buttonContainer">
+            <button id="loadPdfButton" aria-label="Load and Display PDF">Load and Display PDF</button>
+            <input type="file" id="pdfFile" accept="application/pdf">
+        </div>
+        <div id="messageArea"></div>
+        <div id="pdfViewerContainer" class="pdfViewer"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.js"></script>
+    
+    <script src="./index.js"></script>
 </body>
 </html>
