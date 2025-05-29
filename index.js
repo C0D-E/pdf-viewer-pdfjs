@@ -1,111 +1,70 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loadPdfButton = document.getElementById('loadPdfButton');
-    const pdfFileInput = document.getElementById('pdfFile');
-    const pdfViewerContainer = document.getElementById('pdfViewerContainer');
-    const messageArea = document.getElementById('messageArea');
-
-    // Use worker from version 3.11.174
-    const WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; 
-    // ... (the rest of your index.js remains the same as previously provided) ...
-
-    // Ensure pdfjsLib is defined (it should be if pdf.min.js loaded)
-    if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
-    } else {
-        console.error('CRITICAL: pdfjsLib is not loaded. Ensure pdf.min.js (v3.11.174) is included correctly and loads before this script.');
-        showMessage('Error: PDF library core not loaded. Check CDN links.', 'error');
-        return; 
-    }
-    
-    let pdfViewer = null; 
-
-    loadPdfButton.addEventListener('click', () => {
-        pdfFileInput.click(); 
-    });
-
-    pdfFileInput.addEventListener('change', async (event) => {
-        clearMessage(); 
-        const file = event.target.files[0]; 
-
-        if (!file) {
-            showMessage('No file selected.', 'error');
-            return;
-        }
-        if (file.type !== 'application/pdf') {
-            showMessage('Please select a valid PDF file.', 'error');
-            pdfFileInput.value = ''; 
-            return;
-        }
-
-        showMessage('Loading PDF, please wait...', 'loading');
-
-        try {
-            const fileReader = new FileReader();
-            fileReader.onload = async function() {
+fileReader.onload = async function() {
+                console.log('[DEBUG] FileReader.onload triggered. Result length (bytes):', this.result.byteLength);
+                showMessage('Converting file data...', 'loading'); 
                 const typedarray = new Uint8Array(this.result);
+                console.log('[DEBUG] Uint8Array created. Length (bytes):', typedarray.byteLength);
 
-                if (!pdfViewer) {
-                    const eventBus = new pdfjsViewer.EventBus();
-                    const linkService = new pdfjsViewer.PDFLinkService({
-                        eventBus: eventBus,
-                        externalLinkTarget: pdfjsViewer.LinkTarget.BLANK, 
-                    });
-                   
-                    pdfViewer = new pdfjsViewer.PDFViewer({
-                        container: pdfViewerContainer, 
-                        eventBus: eventBus,
-                        linkService: linkService,
-                    });
-                    linkService.setViewer(pdfViewer); 
-                }
-                
-                showMessage('Processing PDF...', 'loading');
-                const pdfDocument = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                
-                pdfViewer.setDocument(pdfDocument);
-                
-                pdfViewer.firstPagePromise.then(() => {
-                    if (pdfViewer.linkService) {
-                         pdfViewer.linkService.setDocument(pdfDocument, null);
+                try { // New try-catch block specifically for viewer setup and document loading
+                    if (!pdfViewer) {
+                        console.log('[DEBUG] PDFViewer instance does not exist. Creating new one.');
+                        
+                        // Explicitly check pdfViewerContainer before using it
+                        console.log('[DEBUG] Checking pdfViewerContainer DOM element. Value:', pdfViewerContainer);
+                        if (!pdfViewerContainer || !(pdfViewerContainer instanceof HTMLElement)) {
+                            console.error('[DEBUG] CRITICAL: pdfViewerContainer element is null, undefined, or not a valid HTMLElement!');
+                            if (pdfViewerContainer) {
+                                console.error('[DEBUG] Type of pdfViewerContainer:', typeof pdfViewerContainer, 'Instance of HTMLElement:', pdfViewerContainer instanceof HTMLElement);
+                            }
+                            showMessage('Error: PDF display area (container) is invalid or not found in HTML. Check ID "pdfViewerContainer".', 'error');
+                            return; // Stop if container is missing or invalid
+                        }
+                        console.log('[DEBUG] pdfViewerContainer seems valid.');
+
+                        const eventBus = new pdfjsViewer.EventBus();
+                        console.log('[DEBUG] EventBus created.');
+                        const linkService = new pdfjsViewer.PDFLinkService({
+                            eventBus: eventBus,
+                            externalLinkTarget: pdfjsViewer.LinkTarget.BLANK,
+                        });
+                        console.log('[DEBUG] PDFLinkService created.');
+                       
+                        pdfViewer = new pdfjsViewer.PDFViewer({
+                            container: pdfViewerContainer,
+                            eventBus: eventBus,
+                            linkService: linkService,
+                        });
+                        console.log('[DEBUG] PDFViewer instance created.');
+                        linkService.setViewer(pdfViewer);
+                        console.log('[DEBUG] LinkService viewer set.');
+                    } else {
+                        console.log('[DEBUG] Reusing existing PDFViewer instance.');
                     }
-                    showMessage('PDF loaded successfully. You can scroll to view all pages.', 'success');
-                }).catch(pageError => {
-                    console.error('Error rendering first page:', pageError);
-                    showMessage(`Error rendering PDF: ${pageError.message}`, 'error');
-                });
-                pdfFileInput.value = ''; 
+                    
+                    showMessage('Processing PDF with PDF.js...', 'loading');
+                    console.log('[DEBUG] Calling pdfjsLib.getDocument(). Worker is set to:', pdfjsLib.GlobalWorkerOptions.workerSrc);
+                    
+                    const pdfDocument = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                    console.log('[DEBUG] pdfjsLib.getDocument() successful. PDF Document loaded. Number of pages:', pdfDocument.numPages);
+                    
+                    pdfViewer.setDocument(pdfDocument);
+                    console.log('[DEBUG] pdfViewer.setDocument(pdfDocument) called.');
+                    
+                    pdfViewer.firstPagePromise.then(() => {
+                        console.log('[DEBUG] pdfViewer.firstPagePromise resolved.');
+                        if (pdfViewer.linkService) {
+                            pdfViewer.linkService.setDocument(pdfDocument, null);
+                            console.log('[DEBUG] pdfViewer.linkService.setDocument() called.');
+                        }
+                        showMessage('PDF loaded successfully. You can scroll to view all pages.', 'success');
+                    }).catch(pageError => {
+                        console.error('[DEBUG] Error during pdfViewer.firstPagePromise:', pageError);
+                        showMessage(`Error rendering first page: ${pageError.message}`, 'error');
+                    });
+
+                } catch (processingError) { // Catches errors from viewer setup or getDocument
+                    console.error('[DEBUG] Error during PDF processing or viewer setup:', processingError);
+                    showMessage(`Error during PDF setup: ${processingError.message || 'Unknown error'}. Check console.`, 'error');
+                }
+
+                pdfFileInput.value = ''; // Clear file input
             };
-
-            fileReader.onerror = function() {
-                console.error('Error reading file.');
-                showMessage('Error reading the selected file.', 'error');
-                pdfViewerContainer.innerHTML = ''; 
-                pdfFileInput.value = ''; 
-            };
-            fileReader.readAsArrayBuffer(file);
-
-        } catch (error) {
-            console.error('Error loading PDF:', error);
-            showMessage(`Error loading PDF: ${error.message || 'Unknown error'}`, 'error');
-            pdfViewerContainer.innerHTML = ''; 
-            pdfFileInput.value = ''; 
-        }
-    });
-
-    function showMessage(text, type = 'info') { 
-        messageArea.textContent = text;
-        messageArea.className = 'messageArea'; // Clear existing styling classes by resetting
-        if (type === 'success') {
-            messageArea.classList.add('message-success');
-        } else if (type === 'error') {
-            messageArea.classList.add('message-error');
-        } else if (type === 'loading') {
-            messageArea.classList.add('message-loading');
-        }
-    }
-
-    function clearMessage() {
-        messageArea.textContent = '';
-        messageArea.className = 'messageArea';
-    }
-});
