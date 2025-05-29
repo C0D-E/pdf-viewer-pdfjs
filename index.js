@@ -1,46 +1,44 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loadPdfButton = document.getElementById('loadPdfButton');
-    const pdfFileInput = document.getElementById('pdfFile');
-    const pdfViewerContainer = document.getElementById('pdfViewerContainer');
-    const messageArea = document.getElementById('messageArea');
+// index.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
 
-    // Ensure this version matches the scripts in your index.html
-    const PDFJS_VERSION = '3.11.174';
-    const WORKER_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
-    
-    console.log(`[DEBUG] DOMContentLoaded. PDF.js Library version target: ${PDFJS_VERSION}`);
-    console.log(`[DEBUG] Worker SRC: ${WORKER_SRC}`);
-
-    if (typeof pdfjsLib === 'undefined') {
-        console.error('[DEBUG] CRITICAL: pdfjsLib is not loaded. Ensure pdf.min.js is included correctly in index.html before this script.');
-        showMessage('Error: PDF library core (pdfjsLib) not loaded. Check HTML script tags.', 'error');
-        return;
-    }
-    console.log('[DEBUG] pdfjsLib is defined.');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
-
-    if (typeof pdfjsViewer === 'undefined') {
-        console.error('[DEBUG] CRITICAL: pdfjsViewer is not loaded. Ensure pdf_viewer.min.js is included correctly in index.html before this script.');
-        showMessage('Error: PDF viewer components (pdfjsViewer) not loaded. Check HTML script tags.', 'error');
-        return;
-    }
-    console.log('[DEBUG] pdfjsViewer is defined.');
-    
-    let pdfViewer = null; // To hold the PDFViewer instance
-
-    loadPdfButton.addEventListener('click', () => {
-        console.log('[DEBUG] loadPdfButton clicked.');
-        pdfFileInput.click(); // Trigger hidden file input
+function renderPDF(pdf) {
+  const viewer = document.getElementById('pdf-viewer');
+  viewer.innerHTML = '';
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    pdf.getPage(pageNum).then(function(page) {
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      viewer.appendChild(canvas);
+      page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport });
     });
+  }
+}
 
-    pdfFileInput.addEventListener('change', async (event) => {
-        console.log('[DEBUG] pdfFileInput change event triggered.');
-        clearMessage();
-        const file = event.target.files[0];
+function loadPDFfromArrayBuffer(arrayBuffer) {
+  pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
+    .then(renderPDF)
+    .catch(err => alert('Error rendering PDF: ' + err.message));
+}
 
-        if (!file) {
-            showMessage('No file selected.', 'error');
-            console.log('[DEBUG] No file selected.');
-            return;
-        }
-        console.log('[DEBUG] File selected:', file.name, 'Type:', file.type, 'Size (bytes):', file
+function loadPDFfromURL(url) {
+  pdfjsLib.getDocument(url).promise
+    .then(renderPDF)
+    .catch(err => alert('Error loading PDF: ' + err.message));
+}
+
+document.getElementById('file-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    loadPDFfromArrayBuffer(ev.target.result);
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('load-url').addEventListener('click', function() {
+  const url = document.getElementById('url-input').value.trim();
+  if (url) loadPDFfromURL(url);
+});
