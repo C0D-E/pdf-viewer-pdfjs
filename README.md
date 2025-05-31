@@ -14,19 +14,30 @@ Supports:
 
 - Renders PDFs using [PDF.js](https://github.com/mozilla/pdf.js)
 - Fully interactive forms
-- Works offline with local assets
+- Works online only (for now) with local assets
 - Runs inside WebView on both Android and iOS
 
 ---
 
 ## 🚀 How to Use
 
-1. Add PDF.js `dist` files (including `web/viewer.html`) to your project assets.
-2. Load `viewer.html` in a WebView:
+1. Using a WebView, point to https://c0d-e.github.io/pdf-viewer-pdfjs/web/viewer.html:
    - Example:
      ```
-     file:///android_asset/pdfjs/web/viewer.html?file=yourfile.pdf
+     <WebView
+          ref={webviewRef}
+          originWhitelist={['*']}
+          source={{ uri: 'https://c0d-e.github.io/pdf-viewer-pdfjs/' }}
+          javaScriptEnabled
+          startInLoadingState
+          injectedJavaScript={injectedJS}
+          renderError={() => <Text>Error loading PDF</Text>}
+          allowFileAccess
+          allowFileAccessFromFileURLs
+          allowUniversalAccessFromFileURLs
+        />
      ```
+2. Use the interface provided by [PDF.js](https://github.com/mozilla/pdf.js) to navigate and interact with the PDF file.
 
 ---
 
@@ -38,10 +49,12 @@ Supports:
 ---
 
 ## 📁 Example Structure
+```text
 /assets/pdfjs/
 ├── build/
 ├── web/
 └── index.html
+```
 
 ---
 
