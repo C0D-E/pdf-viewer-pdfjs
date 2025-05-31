@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>PDF.js Viewer (GitHub Pages)</title>
+  <meta charset="UTF-8">
+  <title>PDF.js Simple Viewer</title>
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; }
-    #controls { padding: 10px; background: #f8f8f8; border-bottom: 1px solid #ddd; }
-    #pdf-viewer { width: 100vw; height: calc(100vh - 50px); overflow: auto; background: #eee; }
-    canvas { display: block; margin: 0 auto; }
+    html, body { height: 100%; margin: 0; }
+    body { display: flex; flex-direction: column; align-items: center; background: #f0f0f0; }
+    #controls { margin: 20px 0; }
+    #pdf-canvas { border: 1px solid #888; background: #fff; }
   </style>
 </head>
 <body>
   <div id="controls">
-    <input type="file" id="file-input" accept="application/pdf" />
-    <input type="text" id="url-input" placeholder="Paste PDF URL here" style="width: 300px;" />
-    <button id="load-url">Load from URL</button>
+    <input type="file" id="fileInput" accept="application/pdf" />
   </div>
-  <div id="pdf-viewer"></div>
-  <!-- PDF.js from CDN -->
+  <canvas id="pdf-canvas"></canvas>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js"></script>
   <script src="index.js"></script>
 </body>
 </html>
