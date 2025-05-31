@@ -1,49 +1,44 @@
-window.addEventListener('DOMContentLoaded', function() {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
 
-  function renderPDF(pdf) {
-    const viewer = document.getElementById('pdf-viewer');
-    viewer.innerHTML = '';
-    function renderPage(pageNum) {
-      if (pageNum > pdf.numPages) return;
-      pdf.getPage(pageNum).then(function(page) {
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        viewer.appendChild(canvas);
-        page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise.then(function() {
-          renderPage(pageNum + 1);
-        });
-      });
+const fileInput = document.getElementById('fileInput');
+const canvas = document.getElementById('pdf-canvas');
+const ctx = canvas.getContext('2d');
+
+fileInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    // Get base64 string, handle both application/pdf and text/plain
+    let base64 = ev.target.result;
+    if (base64.startsWith('data:application/pdf;base64,')) {
+      base64 = base64.replace(/^data:application\/pdf;base64,/, '');
+    } else if (base64.startsWith('data:text/plain;base64,')) {
+      base64 = base64.replace(/^data:text\/plain;base64,/, '');
+    } else {
+      base64 = base64.split(',')[1] || base64;
     }
-    renderPage(1);
-  }
-
-  function loadPDFfromArrayBuffer(arrayBuffer) {
-    pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
-      .then(renderPDF)
-      .catch(err => alert('Error rendering PDF: ' + err.message));
-  }
-
-  function loadPDFfromURL(url) {
-    pdfjsLib.getDocument(url).promise
-      .then(renderPDF)
-      .catch(err => alert('Error loading PDF: ' + err.message));
-  }
-
-  document.getElementById('file-input').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      loadPDFfromArrayBuffer(ev.target.result);
-    };
-    reader.readAsArrayBuffer(file);
-  });
-
-  document.getElementById('load-url').addEventListener('click', function() {
-    const url = document.getElementById('url-input').value.trim();
-    if (url) loadPDFfromURL(url);
-  });
+    const raw = atob(base64);
+    const uint8Array = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+    renderPDF(uint8Array);
+  };
+  reader.readAsDataURL(file);
 });
+
+async function renderPDF(uint8Array) {
+  try {
+    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 1.5 });
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+  } catch (e) {
+    alert('Failed to render PDF: ' + e);
+    console.error(e);
+  }
+}
