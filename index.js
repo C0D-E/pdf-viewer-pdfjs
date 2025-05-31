@@ -1,4 +1,4 @@
-// Set up PDF.js worker
+const pdfjsLib = window.pdfjsLib;
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
 
 const fileInput = document.getElementById('fileInput');
@@ -10,7 +10,6 @@ fileInput.addEventListener('change', function(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(ev) {
-    // Get base64 string, handle both application/pdf and text/plain
     let base64 = ev.target.result;
     if (base64.startsWith('data:application/pdf;base64,')) {
       base64 = base64.replace(/^data:application\/pdf;base64,/, '');
