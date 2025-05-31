@@ -45,6 +45,17 @@ Supports:
 
 - **Android**: Enable JavaScript and file access in `WebView`.
 - **iOS**: Use `WKWebView` and load from local bundle path.
+  
+  ### Dependencies used and extra code added:
+  - For Android in AndroidManifest.xml file:
+    ```
+      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
+      <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    ```
+   - Dependency used for WebView:
+     ```
+     yarn add react-native-webview
+     ```
 
 ---
 
