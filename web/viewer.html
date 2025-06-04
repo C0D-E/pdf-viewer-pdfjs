@@ -732,5 +732,30 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
+    <script><!-- Send the current Pdf to React Native -->
+      function sendCurrentPdfToReactNative() {
+        if (!PDFViewerApplication?.pdfDocument) return;
+    
+        PDFViewerApplication.pdfDocument.saveDocument().then((pdfData) => {
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(pdfData)));
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'pdfBase64',
+            base64
+          }));
+        });
+      }
+      window.addEventListener('message', (e) => {
+        const data = e.data;
+        if (typeof data === 'string' && data === 'request_pdf_base64') {
+          sendCurrentPdfToReactNative();
+        }
+      });
+      window.addEventListener('DOMContentLoaded', () => {
+        if (window.ReactNativeWebView) {
+          document.getElementById('printButton')?.style?.setProperty('display', 'none');
+          document.getElementById('download')?.style?.setProperty('display', 'none');
+        }
+      });
+    </script>
   </body>
 </html>
