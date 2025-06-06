@@ -132,6 +132,7 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
+  alert("Start decoding!");
   document.addEventListener("message", async function (event) {
     let data;
     try {
@@ -17000,6 +17001,7 @@ function webViewerLoad() {
   }
   PDFViewerApplication.run(config);
   setupWebViewPostMessageListener();
+  alert("Message received!");
 }
 document.blockUnblockOnload?.(true);
 if (document.readyState === "interactive" || document.readyState === "complete") {
