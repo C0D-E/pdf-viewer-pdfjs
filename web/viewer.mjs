@@ -159,7 +159,6 @@ function setupWebViewPostMessageListener() {
       alert("❌ Failed to load PDF.");
     }
   });
-  window.ReactNativeWebView?.postMessage(JSON.stringify({ status: "ready" }));
 }
 function scrollIntoView(element, spot, scrollMatches = false) {
   let parent = element.offsetParent;
@@ -15202,6 +15201,7 @@ const PDFViewerApplication = {
     } else {
       this._hideViewBookmark();
     }
+    window.ReactNativeWebView?.postMessage(JSON.stringify({ status: "ready" }));
   },
   get externalServices() {
     return shadow(this, "externalServices", new ExternalServices());
