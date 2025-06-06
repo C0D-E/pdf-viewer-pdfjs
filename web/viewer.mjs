@@ -131,6 +131,45 @@ const CursorTool = {
   ZOOM: 2
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
+function setupWebViewPostMessageListener() {
+  window.addEventListener("message", async (event) => {
+    let data;
+    try {
+      data = JSON.parse(event.data || "{}");
+    } catch (e) {
+      console.error("Invalid message received:", event.data);
+      alert("⚠️ Invalid JSON message received.");
+      return;
+    }
+
+    const { base64, filename = "document.pdf", debugMessage } = data;
+
+    if (debugMessage) {
+      alert(`📬 Message received: ${debugMessage}`);
+      return;
+    }
+
+    if (!base64) {
+      alert("⚠️ No base64 data provided.");
+      return;
+    }
+
+    try {
+      const binary = atob(base64);
+      const uint8Array = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        uint8Array[i] = binary.charCodeAt(i);
+      }
+
+      await PDFViewerApplication.open({ data: uint8Array, filename });
+      alert(`✅ Loaded PDF: ${filename}`);
+    } catch (err) {
+      console.error("Failed to load PDF:", err);
+      alert("❌ Failed to load PDF.");
+    }
+  });
+}
+
 function scrollIntoView(element, spot, scrollMatches = false) {
   let parent = element.offsetParent;
   if (!parent) {
@@ -16961,6 +17000,7 @@ function webViewerLoad() {
     document.dispatchEvent(event);
   }
   PDFViewerApplication.run(config);
+  setupWebViewPostMessageListener();
 }
 document.blockUnblockOnload?.(true);
 if (document.readyState === "interactive" || document.readyState === "complete") {
