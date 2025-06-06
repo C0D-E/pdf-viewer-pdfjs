@@ -132,7 +132,7 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
-  window.addEventListener("message", async (event) => {
+  document.addEventListener("message", async function (event) {
     let data;
     try {
       data = JSON.parse(event.data || "{}");
@@ -169,7 +169,6 @@ function setupWebViewPostMessageListener() {
     }
   });
 }
-
 function scrollIntoView(element, spot, scrollMatches = false) {
   let parent = element.offsetParent;
   if (!parent) {
