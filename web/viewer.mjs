@@ -132,7 +132,6 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
-  alert("Start decoding!");
   document.addEventListener("message", async function (event) {
     let data;
     try {
@@ -140,13 +139,6 @@ function setupWebViewPostMessageListener() {
     } catch (e) {
       console.error("Invalid message received:", event.data);
       alert("⚠️ Invalid JSON message received.");
-      return;
-    }
-
-    const { base64, filename = "document.pdf", debugMessage } = data;
-
-    if (debugMessage) {
-      alert(`📬 Message received: ${debugMessage}`);
       return;
     }
 
@@ -161,14 +153,13 @@ function setupWebViewPostMessageListener() {
       for (let i = 0; i < binary.length; i++) {
         uint8Array[i] = binary.charCodeAt(i);
       }
-
       await PDFViewerApplication.open({ data: uint8Array, filename });
-      alert(`✅ Loaded PDF: ${filename}`);
     } catch (err) {
       console.error("Failed to load PDF:", err);
       alert("❌ Failed to load PDF.");
     }
   });
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ status: "ready" }));
 }
 function scrollIntoView(element, spot, scrollMatches = false) {
   let parent = element.offsetParent;
@@ -17001,7 +16992,6 @@ function webViewerLoad() {
   }
   PDFViewerApplication.run(config);
   setupWebViewPostMessageListener();
-  alert("Message received!");
 }
 document.blockUnblockOnload?.(true);
 if (document.readyState === "interactive" || document.readyState === "complete") {
