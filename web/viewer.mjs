@@ -133,9 +133,9 @@ const CursorTool = {
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
   document.addEventListener("message", async function (event) {
-    let data;
     try {
-      data = JSON.parse(event.data || "{}");
+      const data = JSON.parse(event.data);
+      const { base64, filename } = data;    
     } catch (e) {
       console.error("Invalid message received:", event.data);
       alert("⚠️ Invalid JSON message received.");
@@ -153,7 +153,10 @@ function setupWebViewPostMessageListener() {
       for (let i = 0; i < binary.length; i++) {
         uint8Array[i] = binary.charCodeAt(i);
       }
-      await PDFViewerApplication.open({ data: uint8Array, filename });
+      await PDFViewerApplication.open({
+        data: uint8Array,
+        filename: filename || 'document.pdf'
+      });
     } catch (err) {
       console.error("Failed to load PDF:", err);
       alert("❌ Failed to load PDF.");
