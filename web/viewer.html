@@ -732,29 +732,5 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
-      <script>
-      window.addEventListener("message", function (event) {    
-        try {
-          const { base64, filename = "document.pdf" } = JSON.parse(event.data || "{}");
-    
-          if (!base64) {
-            console.warn("No base64 data received");
-            return;
-          }
-    
-          const binary = atob(base64);
-          const uint8Array = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) {
-            uint8Array[i] = binary.charCodeAt(i);
-          }
-    
-          PDFViewerApplication.open({ data: uint8Array, filename });
-          console.log("PDF loaded via postMessage");
-        } catch (error) {
-          console.error("Error parsing base64 PDF:", error);
-        }
-      });
-    </script>
-
   </body>
 </html>
