@@ -135,18 +135,29 @@ function setupWebViewPostMessageListener() {
   const receiveMessage = async function (event) {
     try {
       const data = JSON.parse(event.data);
+
+      if (data.command === "clear") {
+        PDFViewerApplication.close();
+        return;
+      }
+
       const { base64, filename } = data;
-      
+      if (!base64) {
+        alert("⚠️ No base64 data provided.");
+        return;
+      }
+
       const binary = atob(base64);
       const uint8Array = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
         uint8Array[i] = binary.charCodeAt(i);
       }
-      
+
       await PDFViewerApplication.open({
         data: uint8Array,
         filename: filename || "document.pdf"
       });
+
     } catch (e) {
       console.error("Invalid or failed message:", event.data, e);
       alert("❌ Failed to load base64 PDF.");
