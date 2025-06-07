@@ -132,36 +132,29 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
-  document.addEventListener("message", async function (event) {
+  const receiveMessage = async function (event) {
     try {
       const data = JSON.parse(event.data);
-      const { base64, filename } = data;    
-    } catch (e) {
-      console.error("Invalid message received:", event.data);
-      alert("⚠️ Invalid JSON message received.");
-      return;
-    }
-
-    if (!base64) {
-      alert("⚠️ No base64 data provided.");
-      return;
-    }
-
-    try {
+      const { base64, filename } = data;
+      
       const binary = atob(base64);
       const uint8Array = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
         uint8Array[i] = binary.charCodeAt(i);
       }
+      
       await PDFViewerApplication.open({
         data: uint8Array,
-        filename: filename || 'document.pdf'
+        filename: filename || "document.pdf"
       });
-    } catch (err) {
-      console.error("Failed to load PDF:", err);
-      alert("❌ Failed to load PDF.");
+    } catch (e) {
+      console.error("Invalid or failed message:", event.data, e);
+      alert("❌ Failed to load base64 PDF.");
     }
-  });
+  };
+
+  window.addEventListener("message", receiveMessage);
+  document.addEventListener("message", receiveMessage);
 }
 function scrollIntoView(element, spot, scrollMatches = false) {
   let parent = element.offsetParent;
