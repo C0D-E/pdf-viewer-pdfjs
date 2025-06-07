@@ -132,7 +132,7 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function setupWebViewPostMessageListener() {
-  document.addEventListener("message", async function (event) {
+  window.addEventListener("message", async function (event) {
     try {
       const data = JSON.parse(event.data);
       const { base64, filename } = data;    
