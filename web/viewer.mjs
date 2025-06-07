@@ -15208,7 +15208,7 @@ const PDFViewerApplication = {
     } else {
       this._hideViewBookmark();
     }
-    window.ReactNativeWebView?.postMessage(JSON.stringify({ status: "ready" }));
+    window.ReactNativeWebView?.postMessage(JSON.stringify({ command: "ready" }));
   },
   get externalServices() {
     return shadow(this, "externalServices", new ExternalServices());
