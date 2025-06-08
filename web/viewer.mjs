@@ -156,7 +156,7 @@ function triggerPdfJsFileLoadFromBase64(base64, filename = "document.pdf") {
   }
 }
 function setupWebViewPostMessageListener() {
-  document.addEventListener("message", function (event) {
+  document.addEventListener("message", async function (event) {
     try {
       const data = JSON.parse(event.data);
 
