@@ -139,25 +139,22 @@ function base64ToUint8Array(base64) {
   }
   return bytes;
 }
-function loadPdfFromBase64(base64, filename = "document.pdf") {
+async function loadPdfFromBase64(base64, filename = "document.pdf") {
   try {
     const pdfData = base64ToUint8Array(base64);
-
-    PDFViewerApplication.open({
-        data: pdfData,
-        filename: filename,
-      });
+    const pdfFile = new File([pdfData], filename, { type: "application/pdf" });
+    await PDFViewerApplication.open(pdfFile);
   } catch (err) {
     console.error(`Failed to load PDF: ${filename}`, err);
   }
 }
-function setupWebViewPostMessageListener() {
+async function setupWebViewPostMessageListener() {
   document.addEventListener("message", async function (event) {
     try {
       const data = JSON.parse(event.data);
 
       if (data.command === "clear") {
-        PDFViewerApplication.close();
+        await PDFViewerApplication.close();
         window.ReactNativeWebView?.postMessage(JSON.stringify({ command: "ready" }));
         return;
       }
