@@ -140,9 +140,9 @@ function base64ToUint8Array(base64) {
   }
   return bytes;
 }
-async function loadPdfFromBase64(base64, filename = "document.pdf") {
+function loadPdfFromBase64(base64, filename = "document.pdf") {
   try {
-    await PDFViewerApplication.close();
+    PDFViewerApplication.close();
 
     const pdfData = base64ToUint8Array(base64);
 
@@ -169,7 +169,7 @@ function setupWebViewPostMessageListener() {
       const data = JSON.parse(event.data);
 
       if (data.command === "clear") {
-        await PDFViewerApplication.close();
+        PDFViewerApplication.close();
         window.ReactNativeWebView?.postMessage(JSON.stringify({ command: "ready" }));
         return;
       }
