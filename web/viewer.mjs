@@ -162,6 +162,7 @@ function setupWebViewPostMessageListener() {
 
       if (data.command === "clear") {
         PDFViewerApplication.close();
+        document.location.reload();
         window.ReactNativeWebView?.postMessage(
           JSON.stringify({ command: "ready" })
         );
