@@ -143,7 +143,17 @@ function loadPdfFromBase64(base64, filename = "document.pdf") {
   try {    
     const pdfData = base64ToUint8Array(base64);
     const pdfFile = new File([pdfData], filename, { type: "application/pdf" });
-    PDFViewerApplication.open(pdfFile);
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(pdfFile);
+    
+    const fakeInput = {
+      files: dataTransfer.files,
+    };
+
+    PDFViewerApplication.eventBus.dispatch("fileinputchange", {
+      source: window,
+      fileInput: fakeInput,
+    });
   } catch (err) {
     console.error(`Failed to load PDF: ${filename}`, err);
   }
