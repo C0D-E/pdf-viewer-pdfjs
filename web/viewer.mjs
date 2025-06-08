@@ -131,38 +131,40 @@ const CursorTool = {
   ZOOM: 2
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
+let isReadyForOpen = true;
 function setupWebViewPostMessageListener() {
-  const receiveMessage = async function (event) {
+  document.addEventListener("message", async function (event) {
     try {
       const data = JSON.parse(event.data);
 
       if (data.command === "clear") {
-        PDFViewerApplication.close();
+        await PDFViewerApplication.close();
+        isReadyForOpen = true;
+
+        window.ReactNativeWebView?.postMessage(
+          JSON.stringify({ command: "ready" })
+        );
         return;
       }
 
-      const { base64, filename } = data;
-      if (!base64) {
-        alert("⚠️ No base64 data provided.");
-        return;
-      }
+      if (data.base64 && isReadyForOpen) {
+        const binary = atob(data.base64);
+        const uint8Array = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          uint8Array[i] = binary.charCodeAt(i);
+        }
 
-      const binary = atob(base64);
-      const uint8Array = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        uint8Array[i] = binary.charCodeAt(i);
+        isReadyForOpen = false;
+        await PDFViewerApplication.open({
+          data: uint8Array,
+          filename: data.filename || "document.pdf",
+        });
       }
-
-      await PDFViewerApplication.open({
-        data: uint8Array,
-        filename: filename || "document.pdf"
-      });
 
     } catch (e) {
-      console.error("Invalid or failed message:", event.data, e);
-      alert("❌ Failed to load base64 PDF.");
+      console.error("Invalid message or failed to load PDF:", e);
     }
-  };
+  });
 
   window.addEventListener("message", receiveMessage);
   document.addEventListener("message", receiveMessage);
