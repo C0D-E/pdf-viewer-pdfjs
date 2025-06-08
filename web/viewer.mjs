@@ -132,11 +132,10 @@ const CursorTool = {
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
 function base64ToUint8Array(base64) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
 }
@@ -144,21 +143,12 @@ function loadPdfFromBase64(base64, filename = "document.pdf") {
   try {
     const pdfData = base64ToUint8Array(base64);
 
-    PDFViewerApplication.open(pdfData);
-    
-    if (PDFViewerApplication.metadata?.has("dc:title")) {
-        // PDF metadata title is preferred
-    } else {
-        PDFViewerApplication.setTitleUsingUrl(filename);
-    }
-
+    PDFViewerApplication.open({
+        data: pdfData,
+        filename: filename,
+      });
   } catch (err) {
     console.error(`Failed to load PDF: ${filename}`, err);
-
-    // Use the built-in PDF.js error reporting to display a message to the user.
-    PDFViewerApplication.l10n.get("loading_error").then(msg => {
-        PDFViewerApplication.error(msg, err);
-    });
   }
 }
 function setupWebViewPostMessageListener() {
