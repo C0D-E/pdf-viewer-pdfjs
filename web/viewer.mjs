@@ -140,9 +140,7 @@ function base64ToUint8Array(base64) {
   return bytes;
 }
 function loadPdfFromBase64(base64, filename = "document.pdf") {
-  try {
-    PDFViewerApplication.close();
-    
+  try {    
     const pdfData = base64ToUint8Array(base64);
     const pdfFile = new File([pdfData], filename, { type: "application/pdf" });
     PDFViewerApplication.open(pdfFile);
