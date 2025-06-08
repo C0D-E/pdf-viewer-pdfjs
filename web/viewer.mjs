@@ -153,7 +153,7 @@ function loadPdfFromBase64(base64, filename = "document.pdf") {
     };
 
     PDFViewerApplication.eventBus.dispatch("fileinputchange", {
-      source: window,
+      source: document,
       fileInput: fakeInput,
     });
   } catch (err) {
