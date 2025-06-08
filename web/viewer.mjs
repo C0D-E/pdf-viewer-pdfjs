@@ -131,38 +131,50 @@ const CursorTool = {
   ZOOM: 2
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
-let isReadyForOpen = true;
+function base64ToFile(base64, filename) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new File([bytes], filename, { type: "application/pdf" });
+}
+function triggerPdfJsFileLoadFromBase64(base64, filename = "document.pdf") {
+  try {
+    const file = base64ToFile(base64, filename);
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    const fakeInput = {
+      files: dataTransfer.files
+    };
+    PDFViewerApplication.eventBus.dispatch("fileinputchange", {
+      source: window,
+      fileInput: fakeInput
+    });
+  } catch (err) {
+    console.error("Failed to trigger file load:", err);
+  }
+}
 function setupWebViewPostMessageListener() {
-  document.addEventListener("message", async function (event) {
+  document.addEventListener("message", function (event) {
     try {
       const data = JSON.parse(event.data);
 
       if (data.command === "clear") {
-        await PDFViewerApplication.close();
-        isReadyForOpen = true;
-
+        PDFViewerApplication.close();
+        document.getElementById("viewer").innerHTML = "";
+        window.scrollTo(0, 0);
         window.ReactNativeWebView?.postMessage(
           JSON.stringify({ command: "ready" })
         );
         return;
       }
 
-      if (data.base64 && isReadyForOpen) {
-        const binary = atob(data.base64);
-        const uint8Array = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          uint8Array[i] = binary.charCodeAt(i);
-        }
-
-        isReadyForOpen = false;
-        await PDFViewerApplication.open({
-          data: uint8Array,
-          filename: data.filename || "document.pdf",
-        });
+      if (data.base64) {
+        triggerPdfJsFileLoadFromBase64(data.base64, data.filename);
       }
-
-    } catch (e) {
-      console.error("Invalid message or failed to load PDF:", e);
+    } catch (err) {
+      console.error("Invalid message from React Native:", err);
     }
   });
 
