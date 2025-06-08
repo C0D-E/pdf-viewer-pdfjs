@@ -131,28 +131,36 @@ const CursorTool = {
   ZOOM: 2
 };
 const AutoPrintRegExp = /\bprint\s*\(/;
-function base64ToFile(base64, filename) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+function base64ToUint8Array(base64) {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
-  return new File([bytes], filename, { type: "application/pdf" });
+  return bytes;
 }
-function triggerPdfJsFileLoadFromBase64(base64, filename = "document.pdf") {
+async function loadPdfFromBase64(base64, filename = "document.pdf") {
   try {
-    const file = base64ToFile(base64, filename);
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    const fakeInput = {
-      files: dataTransfer.files
-    };
-    PDFViewerApplication.eventBus.dispatch("fileinputchange", {
-      source: window,
-      fileInput: fakeInput
-    });
+    await PDFViewerApplication.close();
+
+    const pdfData = base64ToUint8Array(base64);
+
+    await PDFViewerApplication.open(pdfData);
+    
+    if (PDFViewerApplication.metadata?.has("dc:title")) {
+        // PDF metadata title is preferred
+    } else {
+        PDFViewerApplication.setTitleUsingUrl(filename);
+    }
+
   } catch (err) {
-    console.error("Failed to trigger file load:", err);
+    console.error(`Failed to load PDF: ${filename}`, err);
+
+    // Use the built-in PDF.js error reporting to display a message to the user.
+    PDFViewerApplication.l10n.get("loading_error").then(msg => {
+        PDFViewerApplication.error(msg, err);
+    });
   }
 }
 function setupWebViewPostMessageListener() {
@@ -161,16 +169,13 @@ function setupWebViewPostMessageListener() {
       const data = JSON.parse(event.data);
 
       if (data.command === "clear") {
-        PDFViewerApplication.close();
-        document.location.reload();
-        window.ReactNativeWebView?.postMessage(
-          JSON.stringify({ command: "ready" })
-        );
+        await PDFViewerApplication.close();
+        window.ReactNativeWebView?.postMessage(JSON.stringify({ command: "ready" }));
         return;
       }
 
       if (data.base64) {
-        triggerPdfJsFileLoadFromBase64(data.base64, data.filename);
+        await loadPdfFromBase64(data.base64, data.filename);
       }
     } catch (err) {
       console.error("Invalid message from React Native:", err);
