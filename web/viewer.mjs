@@ -146,7 +146,7 @@ function loadPdfFromBase64(base64, filename = "document.pdf") {
 
     const pdfData = base64ToUint8Array(base64);
 
-    await PDFViewerApplication.open(pdfData);
+    PDFViewerApplication.open(pdfData);
     
     if (PDFViewerApplication.metadata?.has("dc:title")) {
         // PDF metadata title is preferred
@@ -175,7 +175,7 @@ function setupWebViewPostMessageListener() {
       }
 
       if (data.base64) {
-        await loadPdfFromBase64(data.base64, data.filename);
+        loadPdfFromBase64(data.base64, data.filename);
       }
     } catch (err) {
       console.error("Invalid message from React Native:", err);
