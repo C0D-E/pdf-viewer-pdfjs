@@ -1,8 +1,8 @@
 /**
  * PDF.js to React Native Bridge (MJS Module)
  *
- * This script intercepts the 'download' (save) and 'print' actions in the PDF.js viewer.
- * Instead of performing the default browser actions, it sends the PDF file as a
+ * This script intercepts the 'download' (save) and 'print' commands in the PDF.js viewer.
+ * Instead of performing the default browser commands, it sends the PDF file as a
  * base64 encoded string back to a React Native WebView.
  *
  * How to use:
@@ -16,7 +16,7 @@
 document.addEventListener('webviewerloaded', () => {
   // First, check if the ReactNativeWebView postMessage function is available
   if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
-    console.log('React Native WebView environment detected. Overriding PDF.js UI actions.');
+    console.log('React Native WebView environment detected. Overriding PDF.js UI commands.');
 
     /**
      * Helper function to convert a Uint8Array to a base64 string.
@@ -37,7 +37,7 @@ document.addEventListener('webviewerloaded', () => {
 
     // --- Override the Download/Save button functionality ---
     App.download = async function pdfViewDownloadOverridden() {
-      console.log('Custom download action triggered.');
+      console.log('Custom download command triggered.');
       try {
         // The saveDocument() method gets the PDF data with any annotations included.
         // It returns a Promise that resolves with a Uint8Array.
@@ -51,7 +51,7 @@ document.addEventListener('webviewerloaded', () => {
 
         // Prepare the message for React Native
         const message = {
-          action: 'save',
+          command: 'save',
           data: base64data,
           filename: filename,
         };
@@ -61,7 +61,7 @@ document.addEventListener('webviewerloaded', () => {
         console.log('Save message successfully posted to React Native.');
 
       } catch (error) {
-        console.error('Error during custom save/download action:', error);
+        console.error('Error during custom save/download command:', error);
         // Here you could add a fallback to the original download method if you wish
         // PDFViewerApplication.prototype.download.call(this);
       }
@@ -69,7 +69,7 @@ document.addEventListener('webviewerloaded', () => {
 
     // --- Override the Print button functionality ---
     App.print = async function pdfViewPrintOverridden() {
-      console.log('Custom print action triggered.');
+      console.log('Custom print command triggered.');
       try {
         // We get the most up-to-date document data, including any user changes.
         const data = await App.pdfDocument.saveDocument();
@@ -79,7 +79,7 @@ document.addEventListener('webviewerloaded', () => {
 
         // Prepare the message for React Native
         const message = {
-          action: 'print',
+          command: 'print',
           data: base64data,
         };
 
@@ -88,15 +88,15 @@ document.addEventListener('webviewerloaded', () => {
         console.log('Print message successfully posted to React Native.');
 
       } catch (error) {
-        console.error('Error during custom print action:', error);
+        console.error('Error during custom print command:', error);
         // Fallback to the original print method in case of an error
         // PDFViewerApplication.prototype.print.call(this);
       }
     };
 
-    console.log('PDF.js print and download actions have been successfully overridden.');
+    console.log('PDF.js print and download commands have been successfully overridden.');
 
   } else {
-    console.warn('React Native WebView environment not detected. PDF.js will use default actions.');
+    console.warn('React Native WebView environment not detected. PDF.js will use default commands.');
   }
 });
